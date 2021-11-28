@@ -303,8 +303,8 @@ var Formatter = function () {
   }, {
     key: "formatWithSpaces",
     value: function formatWithSpaces(token, query) {
-      // When aliasing, the alias name should be quoted
-      let plsQuote = query.substr(-4).toUpperCase() === ' AS ' && token.value.substr(0, 1) !== '"' ? '"' : '';
+      // When aliasing, the alias name should be quoted, take care not to catch CAST('1' AS INT)
+      let plsQuote = query.substr(-4).toUpperCase() === ' AS ' && reservedWords.indexOf(token.value.toUpperCase()) === -1 && token.value.substr(0, 1) !== '"' ? '"' : '';
       return query + plsQuote + this.show(token) + plsQuote + ' ';
     }
   }, {

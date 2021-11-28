@@ -1,10 +1,9 @@
 # sql-format-vector
-Format Actian Vector SQL nicely
-Based on the excellent work here: https://github.com/zeroturnaround/sql-formatter
-Adds reserved words
-Formats short queries as single lines
-Quotes aliases
-Aligns join terms
+Format Actian Vector SQL nicely, based on the excellent work here: https://github.com/zeroturnaround/sql-formatter
+* Adds reserved words
+* Formats short queries as single lines
+* Quotes aliases
+* Aligns join terms
 
 Ideally future versions will quote fields in table generation and align field names, types & nullable status.
 

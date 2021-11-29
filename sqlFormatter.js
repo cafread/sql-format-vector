@@ -162,8 +162,13 @@ var Formatter = function () {
         token = _this.tokenOverride(token);
         if (token.value.toUpperCase() === 'CREATE') {
           inCreate = 1;
-        } else if (inCreate === 1 && token.value === '(') {
-          inCreate = 2;
+        } else if (inCreate === 1 && token.value === '(') { // && Not CTAS
+          // if we can find 'SELECT' between the last 'CREATE' and the end of formattedQuery
+          // need regex so we don't end up matching something in an alias / table name of best_selections etc.
+          let splitByCreate = formattedQuery.split(/\bCREATE\b/gi)
+          let afterCreate = splitByCreate[splitByCreate.length - 1];
+          let isCTAS = afterCreate.match(/\bSELECT\b/gi) !== null;
+          inCreate = isCTAS ? 0 : 2;
         } else if (inCreate === 2 && token.value === ';') {
           inCreate = 0;
         }
@@ -348,11 +353,16 @@ var Formatter = function () {
         }
       }
       // When aliasing, the alias name should be lower case & quoted, take care not to catch CAST('1' AS INT) or numpas INT
-      let qAs = '';
-      if (this.tokenLookBehind() && this.tokenLookBehind().value.toUpperCase() === 'AS' && reservedDataTypes.indexOf(token.value.toUpperCase()) === -1) {
-        qAs = token.value.substr(0, 1) !== '"' ? '"' : '';
-        token.value = token.value.toLowerCase();
-      }
+      //let qAs = '';
+      //if (this.tokenLookBehind() && this.tokenLookBehind().value.toUpperCase() === 'AS' && reservedDataTypes.indexOf(token.value.toUpperCase()) === -1) {
+      //  qAs = token.value.substr(0, 1) !== '"' ? '"' : '';
+      //  token.value = token.value.toLowerCase();
+      //}
+
+      // When aliasing, the alias name should be quoted, take care not to catch CAST('1' AS INT) or numpas INT
+      let qAs = this.tokenLookBehind() && this.tokenLookBehind().value.toUpperCase() === 'AS' && reservedDataTypes.indexOf(token.value.toUpperCase()) === -1 && token.value.substr(0, 1) !== '"' ? '"' : '';
+
+
       // In select first n statements, want the first field to be on a new line, not next to first n
       if (this.tokenLookBehind(3) && this.tokenLookBehind(3).value.toUpperCase() === 'SELECT' && this.tokenLookBehind(2).value.toUpperCase() === 'FIRST') query = this.addNewline(query);
       return query + qAs + this.show(token) + qAs + ' ';

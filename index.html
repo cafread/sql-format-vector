@@ -60,7 +60,8 @@
         smartIndent: false,
         lineNumbers: true,
         matchBrackets : true,
-        autofocus: false
+        autofocus: false,
+        tabSize: 2
       });
       window.output = CodeMirror.fromTextArea(document.getElementById('output'), {
         mode: 'text/x-pgsql',
@@ -68,7 +69,8 @@
         smartIndent: false,
         lineNumbers: true,
         matchBrackets : true,
-        autofocus: false
+        autofocus: false,
+        tabSize: 2
       });
       function format() {
         let inp = input.doc.getValue();

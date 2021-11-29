@@ -160,7 +160,6 @@ var Formatter = function () {
       this.tokens.forEach(function (token, index) {
         _this.index = index;
         token = _this.tokenOverride(token);
-        
         if (token.value.toUpperCase() === 'CREATE') {
           inCreate = 1;
         } else if (inCreate === 1 && token.value === '(') {
@@ -182,7 +181,10 @@ var Formatter = function () {
           formattedQuery = _this.formatNewlineReservedWord(token, formattedQuery);
           _this.previousReservedToken = token;
         } else if (token.type === _tokenTypes_WIM0__["default"].RESERVED) {
-
+          // Want SELECT FIRST 10 on a single line
+          if (token.value.toUpperCase() === 'FIRST' && formattedQuery.substr(-9).toUpperCase() === 'SELECT\n  ') {
+            formattedQuery = formattedQuery.substr(0, formattedQuery.length - 3) + ' ';
+          }
           if (inCreate === 2 && reservedDataTypes.indexOf(token.value.toUpperCase()) > -1) {
             // Try to align data type in table create statement
             token.value = (' ').repeat(Math.max(0, dataTypeChPos - (formattedQuery.length - formattedQuery.lastIndexOf('\n')))) + token.value;
@@ -216,7 +218,7 @@ var Formatter = function () {
           } else if (inCreate === 2 && isNaN(parseInt(token.value)) && (["'"]).indexOf(token.value.substr(0, 1)) === -1) {
             token.value = token.value.toLowerCase();
           }
-          formattedQuery = _this.formatWithSpaces(token, formattedQuery, inCreate);
+          formattedQuery = _this.formatWithSpaces(token, formattedQuery);
         }
       });
       return formattedQuery;
@@ -312,7 +314,6 @@ var Formatter = function () {
     key: "formatComma",
     value: function formatComma(token, query) {
       query = Object(_utils_WIM4__["trimSpacesEnd"])(query) + this.show(token) + ' ';
-
       if (this.inlineBlock.isActive()) {
         return query;
       } else if (Object(_token_WIM5__["isLimit"])(this.previousReservedToken)) {
@@ -333,7 +334,7 @@ var Formatter = function () {
     }
   }, {
     key: "formatWithSpaces",
-    value: function formatWithSpaces(token, query, inCreate) {
+    value: function formatWithSpaces(token, query) {
       // Don't split up valid combos ||, !=
       let validCombos = ['||', '!='];
       if (validCombos.filter(v => v[0] === token.value).length > -1 && this.tokenLookAhead()) {
@@ -344,6 +345,8 @@ var Formatter = function () {
       }
       // When aliasing, the alias name should be quoted, take care not to catch CAST('1' AS INT) or numpas INT
       let qAs = this.tokenLookBehind() && this.tokenLookBehind().value.toUpperCase() === 'AS' && reservedDataTypes.indexOf(token.value.toUpperCase()) === -1 && token.value.substr(0, 1) !== '"' ? '"' : '';
+      // In select first n statements, want the first field to be on a new line, not next to first n
+      if (this.tokenLookBehind(3) && this.tokenLookBehind(3).value.toUpperCase() === 'SELECT' && this.tokenLookBehind(2).value.toUpperCase() === 'FIRST') query = this.addNewline(query);
       return query + qAs + this.show(token) + qAs + ' ';
     }
   }, {
@@ -475,7 +478,6 @@ var Indentation = function () {
     value: function decreaseBlockLevel() {
       while (this.indentTypes.length > 0) {
         var type = this.indentTypes.pop();
-
         if (type !== INDENT_TYPE_TOP_LEVEL) {
           break;
         }

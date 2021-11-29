@@ -1,5 +1,4 @@
 /* BASICS */
-
 .CodeMirror {
   /* Set height, width, borders, and global font properties here */
   font-family: monospace;
@@ -9,9 +8,7 @@
   direction: ltr;
   font-size: 1.3em;
 }
-
 /* PADDING */
-
 .CodeMirror-lines {
   padding: 4px 0; /* Vertical padding around content */
 }
@@ -19,13 +16,10 @@
 .CodeMirror pre.CodeMirror-line-like {
   padding: 0 4px; /* Horizontal padding of content */
 }
-
 .CodeMirror-scrollbar-filler, .CodeMirror-gutter-filler {
-  background-color: white; /* The little square between H and V scrollbars */
+  background-color: rgb(255, 255, 255); /* The little square between H and V scrollbars */
 }
-
 /* GUTTER */
-
 .CodeMirror-gutters {
   border-right: 1px solid #ddd;
   background-color: #f7f7f7;
@@ -39,12 +33,9 @@
   color: #999;
   white-space: nowrap;
 }
-
 .CodeMirror-guttermarker { color: black; }
 .CodeMirror-guttermarker-subtle { color: #999; }
-
 /* CURSOR */
-
 .CodeMirror-cursor {
   border-left: 1px solid black;
   border-right: none;
@@ -84,12 +75,9 @@
   50% { background-color: transparent; }
   100% {}
 }
-
 /* Can style cursor different in overwrite (non-insert) mode */
 .CodeMirror-overwrite .CodeMirror-cursor {}
-
 .cm-tab { display: inline-block; text-decoration: inherit; }
-
 .CodeMirror-rulers {
   position: absolute;
   left: 0; right: 0; top: -50px; bottom: 0;
@@ -100,9 +88,7 @@
   top: 0; bottom: 0;
   position: absolute;
 }
-
 /* DEFAULT THEME */
-
 .cm-s-default .cm-header {color: blue;}
 .cm-s-default .cm-quote {color: #090;}
 .cm-negative {color: #d44;}
@@ -140,21 +126,17 @@
 .CodeMirror-composing { border-bottom: 2px solid; }
 
 /* Default styles for common addons */
-
 div.CodeMirror span.CodeMirror-matchingbracket {color: #0b0;}
 div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #a22;}
 .CodeMirror-matchingtag { background: rgba(255, 150, 0, .3); }
 .CodeMirror-activeline-background {background: #e8f2ff;}
-
 /* STOP */
-
 /* The rest of this file contains styles related to the mechanics of
    the editor. You probably shouldn't touch them. */
-
 .CodeMirror {
   position: relative;
   overflow: hidden;
-  background: white;
+  background: rgb(220, 220, 220);
 }
 
 .CodeMirror-scroll {

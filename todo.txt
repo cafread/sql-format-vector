@@ -1,4 +1,2 @@
-Sort out create one lining for no good reason
-align create
-VARCHAR (2) >> VARCHAR(2) (no space)
+CHAR (2) >> CHAR(2) (no space)
 

@@ -2,11 +2,11 @@
 // Adapted for Vector & PX Standards by https://github.com/cafread
 
 (function webpackUniversalModuleDefinition(root, factory) {
-	if(typeof exports === 'object' && typeof module === 'object')
+	if (typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
-	else if(typeof define === 'function' && define.amd)
+	else if (typeof define === 'function' && define.amd)
 		define([], factory);
-	else if(typeof exports === 'object')
+	else if (typeof exports === 'object')
 		exports["sqlFormatter"] = factory();
 	else
 		root["sqlFormatter"] = factory();
@@ -17,7 +17,7 @@ return  (function(modules) { // webpackBootstrap
  	// The require function
  	function _wprq_(moduleId) {
  		// Check if module is in cache
- 		if(installedModules[moduleId]) {
+ 		if (installedModules[moduleId]) {
  			return installedModules[moduleId].exports;
  		}
  		// Create a new module (and put it into the cache)
@@ -39,13 +39,13 @@ return  (function(modules) { // webpackBootstrap
  	_wprq_.c = installedModules;
  	// define getter function for harmony exports
  	_wprq_.d = function(exports, name, getter) {
- 		if(!_wprq_.o(exports, name)) {
+ 		if (!_wprq_.o(exports, name)) {
  			Object.defineProperty(exports, name, { enumerable: true, get: getter });
  		}
  	};
  	// define __esModule on exports
  	_wprq_.r = function(exports) {
- 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+ 		if (typeof Symbol !== 'undefined' && Symbol.toStringTag) {
  			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
  		}
  		Object.defineProperty(exports, '__esModule', { value: true });
@@ -56,13 +56,13 @@ return  (function(modules) { // webpackBootstrap
  	// mode & 4: return value when already ns object
  	// mode & 8|1: behave like require
  	_wprq_.t = function(value, mode) {
- 		if(mode & 1) value = _wprq_(value);
- 		if(mode & 8) return value;
- 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
+ 		if (mode & 1) value = _wprq_(value);
+ 		if (mode & 8) return value;
+ 		if ((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
  		var ns = Object.create(null);
  		_wprq_.r(ns);
  		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
- 		if(mode & 2 && typeof value != 'string') for(var key in value) _wprq_.d(ns, key, function(key) { return value[key]; }.bind(null, key));
+ 		if (mode & 2 && typeof value != 'string') for(var key in value) _wprq_.d(ns, key, function(key) { return value[key]; }.bind(null, key));
  		return ns;
  	};
  	// getDefaultExport function for compatibility with non-harmony modules
@@ -163,15 +163,11 @@ var Formatter = function () {
         
         if (token.value.toUpperCase() === 'CREATE') {
           inCreate = 1;
-          //console.log('ready create statement');
         } else if (inCreate === 1 && token.value === '(') {
           inCreate = 2;
-          //console.log('begin create statement');
         } else if (inCreate === 2 && token.value === ';') {
           inCreate = 0;
-          //console.log('end create statement');
         }
-
         if (token.type === _tokenTypes_WIM0__["default"].LINE_COMMENT) {
           formattedQuery = _this.formatLineComment(token, formattedQuery);
         } else if (token.type === _tokenTypes_WIM0__["default"].BLOCK_COMMENT) {
@@ -186,10 +182,14 @@ var Formatter = function () {
           formattedQuery = _this.formatNewlineReservedWord(token, formattedQuery);
           _this.previousReservedToken = token;
         } else if (token.type === _tokenTypes_WIM0__["default"].RESERVED) {
+
           if (inCreate === 2 && reservedDataTypes.indexOf(token.value.toUpperCase()) > -1) {
-            // Try to align data type in table create statement on the 
-            let dataTypeChPos = 33;
+            // Try to align data type in table create statement
             token.value = (' ').repeat(Math.max(0, dataTypeChPos - (formattedQuery.length - formattedQuery.lastIndexOf('\n')))) + token.value;
+            formattedQuery = _this.formatWithSpaces(token, formattedQuery);
+          } else if (inCreate === 2 && reservedConstraints.indexOf(token.value.toUpperCase()) > -1) {
+            // Align PRIMARY KEY, NULL, NOT NULL a bit further along
+            token.value = (' ').repeat(Math.max(0, constraintChPos - (formattedQuery.length - formattedQuery.lastIndexOf('\n')))) + token.value;
             formattedQuery = _this.formatWithSpaces(token, formattedQuery);
           } else {
             formattedQuery = _this.formatWithSpaces(token, formattedQuery);
@@ -224,6 +224,7 @@ var Formatter = function () {
   }, {
     key: "formatLineComment",
     value: function formatLineComment(token, query) {
+      token.value = token.value.replace(/--\S/gmi, v => '-- ' + v.substr(2));
       return this.addNewline(query + this.show(token));
     }
   }, {
@@ -278,6 +279,10 @@ var Formatter = function () {
       var preserveWhitespaceFor = (_preserveWhitespaceFo = {}, _defineProperty(_preserveWhitespaceFo, _tokenTypes_WIM0__["default"].OPEN_PAREN, true), _defineProperty(_preserveWhitespaceFo, _tokenTypes_WIM0__["default"].LINE_COMMENT, true), _defineProperty(_preserveWhitespaceFo, _tokenTypes_WIM0__["default"].OPERATOR, true), _preserveWhitespaceFo);
       if (token.whitespaceBefore.length === 0 && !preserveWhitespaceFor[(_this$tokenLookBehind = this.tokenLookBehind()) === null || _this$tokenLookBehind === void 0 ? void 0 : _this$tokenLookBehind.type]) {
         query = Object(_utils_WIM4__["trimSpacesEnd"])(query);
+      }
+      // if the previous token was CHAR, VARCHAR, DECIMAL etc. don't include a space before the open bracket
+      if (this.tokenLookBehind() && reservedDataTypes.indexOf(this.tokenLookBehind().value.toUpperCase()) > -1 && query.substr(-1) === ' ') {
+        query = query.trimEnd();
       }
       query += this.show(token);
       this.inlineBlock.beginIfPossible(this.tokens, this.index);
@@ -334,12 +339,11 @@ var Formatter = function () {
       if (validCombos.filter(v => v[0] === token.value).length > -1 && this.tokenLookAhead()) {
         let nextToken = this.tokenLookAhead().value;
         for (let vc of validCombos.filter(v => v[0] === token.value)){
-          if(nextToken === vc[1]) return query + this.show(token);
+          if (nextToken === vc[1]) return query + this.show(token);
         }
       }
       // When aliasing, the alias name should be quoted, take care not to catch CAST('1' AS INT) or numpas INT
       let qAs = this.tokenLookBehind() && this.tokenLookBehind().value.toUpperCase() === 'AS' && reservedDataTypes.indexOf(token.value.toUpperCase()) === -1 && token.value.substr(0, 1) !== '"' ? '"' : '';
-      //console.log(inCreate, token.value);
       return query + qAs + this.show(token) + qAs + ' ';
     }
   }, {

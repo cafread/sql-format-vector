@@ -187,8 +187,9 @@ var Formatter = function () {
           _this.previousReservedToken = token;
         } else if (token.type === _tokenTypes_WIM0__["default"].RESERVED) {
           if (inCreate === 2 && reservedDataTypes.indexOf(token.value.toUpperCase()) > -1) {
-            //console.log(token.value, formattedQuery.length - formattedQuery.lastIndexOf('\n'));
-            token.value = (' ').repeat(Math.max(0, 33 - (formattedQuery.length - formattedQuery.lastIndexOf('\n')))) + token.value;
+            // Try to align data type in table create statement on the 
+            let dataTypeChPos = 33;
+            token.value = (' ').repeat(Math.max(0, dataTypeChPos - (formattedQuery.length - formattedQuery.lastIndexOf('\n')))) + token.value;
             formattedQuery = _this.formatWithSpaces(token, formattedQuery);
           } else {
             formattedQuery = _this.formatWithSpaces(token, formattedQuery);
@@ -211,7 +212,9 @@ var Formatter = function () {
         } else {
           // In create statements, wrap field names with quotes, if they aren't already.  Don't wrap default values / data types!
           if (inCreate === 2 && isNaN(parseInt(token.value)) && (["'", '"']).indexOf(token.value.substr(0, 1)) === -1) {
-            token.value = '"' + token.value + '"';
+            token.value = '"' + token.value.toLowerCase() + '"';
+          } else if (inCreate === 2 && isNaN(parseInt(token.value)) && (["'"]).indexOf(token.value.substr(0, 1)) === -1) {
+            token.value = token.value.toLowerCase();
           }
           formattedQuery = _this.formatWithSpaces(token, formattedQuery, inCreate);
         }

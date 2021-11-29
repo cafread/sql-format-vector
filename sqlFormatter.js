@@ -286,6 +286,10 @@ var Formatter = function () {
       if (this.tokenLookBehind() && reservedDataTypes.indexOf(this.tokenLookBehind().value.toUpperCase()) > -1 && query.substr(-1) === ' ') {
         query = query.trimEnd();
       }
+      // if the previous token was a function that takes arguments don't include a space before the open bracket
+      if (this.tokenLookBehind() && reservedFuncTypes.indexOf(this.tokenLookBehind().value.toUpperCase()) > -1 && query.substr(-1) === ' ') {
+        query = query.trimEnd();
+      }
       query += this.show(token);
       this.inlineBlock.beginIfPossible(this.tokens, this.index);
       if (!this.inlineBlock.isActive()) {

@@ -1,3 +1,5 @@
+// These should probably be key : object pairs where the object has properties like name, isFunction, lineBefore, lineAfter, noIndent, isDataType
+// Unfortunately, that would require reworking a lot of the code base that this was built upon
 var reservedWords = [
   'ABS', 'ACOS', 'ADD_MONTHS', 'ALL', 'ALTER', 'AND', 'ANSIDATE', 'ANY', 'AS', 'ASCII', 'ASIN', 'AT', 'ATAN', 'ATAN2', 'AVG', 'BEGINNING', 'BETWEEN', 'BIGINT', 'BIT_AND', 'BIT_NOT', 'BIT_OR', 
   'BIT_XOR', 'BOOLEAN', 'BOTH', 'BY', 'CALL', 'CALLED', 'CARDINALITY', 'CASE', 'CAST', 'CEIL', 'CEILING', 'CHAR', 'CHARACTER', 'CHARACTER_LENGTH', 'CHAREXTRACT', 'CHAR_LENGTH', 'CHR', 'CLOSE', 
@@ -23,6 +25,10 @@ var reservedWords = [
 ];
 var reservedTopLevelWords = [
     'ADD', 'ALTER COLUMN', 'ALTER TABLE', 'CASE', 'DELETE FROM', 'END', 'GROUP BY', 'LEFT JOIN', 'JOIN', 'FROM', 'HAVING', 'INSERT INTO', 'ORDER BY', 'SELECT', 'SET', 'UPDATE', 'VALUES', 'WHERE',
+    'INNER JOIN', 'LEFT OUTER JOIN', 'RIGHT JOIN', 'RIGHT OUTER JOIN', 'FULL JOIN', 'FULL OUTER JOIN', 'CROSS JOIN'
+];
+var reservedTopLevelWordsNoLineAfter = [
+    'ADD', 'ALTER COLUMN', 'ALTER TABLE', 'CASE', 'DELETE FROM', 'END', 'GROUP BY', 'LEFT JOIN', 'JOIN', 'FROM', 'HAVING', 'INSERT INTO', 'ORDER BY', 'SET', 'UPDATE', 'WHERE',
     'INNER JOIN', 'LEFT OUTER JOIN', 'RIGHT JOIN', 'RIGHT OUTER JOIN', 'FULL JOIN', 'FULL OUTER JOIN', 'CROSS JOIN'
 ];
 var reservedTopLevelWordsNoIndent = ['INTERSECT', 'UNION', 'UNION ALL', 'UNION DISTINCT', 'EXCEPT'];

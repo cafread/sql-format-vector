@@ -253,7 +253,7 @@ var Formatter = function () {
       query = this.addNewline(query);
       this.indentation.increaseTopLevel();
       query += this.equalizeWhitespace(this.show(token));
-      if ( (['FROM', 'JOIN', 'WHERE', 'INSERT INTO', 'GROUP BY', 'ORDER BY', 'HAVING']).includes(token.value.toUpperCase()) ){
+      if (reservedTopLevelWordsNoLineAfter.includes(token.value.toUpperCase()) ) {
         return query + ' ';
       } else {
         return this.addNewline(query);

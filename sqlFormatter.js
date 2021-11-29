@@ -156,9 +156,17 @@ var Formatter = function () {
     value: function getFormattedQueryFromTokens() {
       var _this = this;
       var formattedQuery = '';
+      let inCreate = false;
       this.tokens.forEach(function (token, index) {
         _this.index = index;
         token = _this.tokenOverride(token);
+        if (token.value.toUpperCase() === 'CREATE') {
+          inCreate = true;
+          console.log('begin create statement');
+        } else if (inCreate === true && token.value === ')') {
+          inCreate = false;
+          console.log('end create statement');
+        }
         if (token.type === _tokenTypes_WIM0__["default"].LINE_COMMENT) {
           formattedQuery = _this.formatLineComment(token, formattedQuery);
         } else if (token.type === _tokenTypes_WIM0__["default"].BLOCK_COMMENT) {
@@ -303,6 +311,14 @@ var Formatter = function () {
   }, {
     key: "formatWithSpaces",
     value: function formatWithSpaces(token, query) {
+      // Don't split up valid combos ||, !=
+      let validCombos = ['||', '!='];
+      if (validCombos.filter(v => v[0] === token.value).length > -1 && this.tokenLookAhead()) {
+        let nextToken = this.tokenLookAhead().value;
+        for (let vc of validCombos.filter(v => v[0] === token.value)){
+          if(nextToken === vc[1]) return query + this.show(token);
+        }
+      }
       // When aliasing, the alias name should be quoted, take care not to catch CAST('1' AS INT)
       let plsQuote = query.substr(-4).toUpperCase() === ' AS ' && reservedWords.indexOf(token.value.toUpperCase()) === -1 && token.value.substr(0, 1) !== '"' ? '"' : '';
       return query + plsQuote + this.show(token) + plsQuote + ' ';

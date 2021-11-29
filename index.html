@@ -52,7 +52,7 @@ select * from sample;</textarea
         >
       </section>
       <section class="output">
-        <textarea id="output" readonly="true" wrap="off"></textarea>
+        <textarea id="output" readonly="true" wrap="off">Formatted output will appear here</textarea>
       </section>
     </main>
     <script>
@@ -77,7 +77,6 @@ select * from sample;</textarea
         output.doc.setValue(sqlFormatter.format(inp, {language: 'sql', uppercase: true}));
       }
       CodeMirror.on(input, 'change', format);
-      setTimeout(format(), 100);
     </script>
   </body>
 </html>

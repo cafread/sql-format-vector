@@ -1,0 +1,4 @@
+| | >> ||
+align create
+VARCHAR (2) >> VARCHAR(2) (no space)
+

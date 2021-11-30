@@ -74,7 +74,15 @@
       });
       function format() {
         let inp = input.doc.getValue();
-        output.doc.setValue(sqlFormatter.format(inp, {language: 'sql', uppercase: true}));
+        let endsWithSc = inp.replace(/\s/gm, '').slice(-1) === ';';
+        // To improve performance when dealing with many queries at once and making edits, split into individual queries and cache results
+        // Find all non-commented ; and split into individual queries
+        // To avoid a super complex regex, replacing commented ';' with 'ỿ' temporarily
+        let queries = input.doc.getValue().replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\-\-.*$ /gm, v => v.replaceAll(';', 'ỿ')).split(';').map(v => v.replaceAll('ỿ', ';'));
+        for (let q of queries.filter(v => !queryCache.hasOwnProperty(v))) queryCache[q] = sqlFormatter.format(q + ';', {language: 'sql', uppercase: true});
+        let out = queries.map(q => queryCache[q]).join('\n');
+        out =  endsWithSc ? out : out.slice(0, out.length - 1);
+        output.doc.setValue(out);
       }
       CodeMirror.on(input, 'change', format);
     </script>

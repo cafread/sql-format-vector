@@ -59,3 +59,4 @@ var reservedConstraints = [
 var dataTypeChPos = 35;
 var constraintChPos = 63;
 var INLINE_MAX_LENGTH = 70;
+let queryCache = {';': '', '\n': '', '': ''};

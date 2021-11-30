@@ -572,7 +572,7 @@ var Indentation = function () {
         for (var i = index; i < tokens.length; i++) {
           var token = tokens[i];
           length += token.value.length; // Overran max length
-          if (length > INLINE_MAX_LENGTH) {
+          if (length > (INLINE_MAX_LENGTH - 30)) {
             return false;
           }
           if (token.type === _tokenTypes_WIM0__["default"].OPEN_PAREN) {

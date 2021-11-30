@@ -83,8 +83,24 @@
         let out = queries.map(q => queryCache[q]).join('\n');
         out =  endsWithSc ? out : out.slice(0, out.length - 1);
         output.doc.setValue(out);
+        gcCache(queries)
       }
-      CodeMirror.on(input, 'change', format);
+      function gcCache (active=[]) {
+        // So that editing continuously doesn't use all the memory on the system run garbage collection
+        let keepKeys = (['', ';', '\n']).concat(active); // Keys in the cache we want to preserve
+        // If there was a lot of concern about repeated queries, this could be a Set rather than an Array
+        for (let key of Object.keys(queryCache)) if (!keepKeys.includes(key)) delete queryCache[key];
+      }
+      // Avoid excessive calls while typing by debouncing input change
+      function debounce (callback, time = 200) {
+        let interval;
+        return (...args) => {
+          clearTimeout(interval);
+          interval = setTimeout(() => {interval = null; callback(...args);}, time);
+        };
+      }
+      var dbf = debounce(format);
+      CodeMirror.on(input, 'change', dbf);
     </script>
   </body>
 </html>

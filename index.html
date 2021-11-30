@@ -101,7 +101,7 @@
           interval = setTimeout(() => {interval = null; callback(...args);}, time);
         };
       }
-      var dbf = debounce(format);
+      var dbf = debounce(format, 40);
       CodeMirror.on(input, 'change', dbf);
     </script>
   </body>

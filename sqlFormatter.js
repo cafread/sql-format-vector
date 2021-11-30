@@ -353,16 +353,11 @@ var Formatter = function () {
         }
       }
       // When aliasing, the alias name should be lower case & quoted, take care not to catch CAST('1' AS INT) or numpas INT
-      //let qAs = '';
-      //if (this.tokenLookBehind() && this.tokenLookBehind().value.toUpperCase() === 'AS' && reservedDataTypes.indexOf(token.value.toUpperCase()) === -1) {
-      //  qAs = token.value.substr(0, 1) !== '"' ? '"' : '';
-      //  token.value = token.value.toLowerCase();
-      //}
-
-      // When aliasing, the alias name should be quoted, take care not to catch CAST('1' AS INT) or numpas INT
-      let qAs = this.tokenLookBehind() && this.tokenLookBehind().value.toUpperCase() === 'AS' && reservedDataTypes.indexOf(token.value.toUpperCase()) === -1 && token.value.substr(0, 1) !== '"' ? '"' : '';
-
-
+      let qAs = '';
+      if (this.tokenLookBehind() && this.tokenLookBehind().value.toUpperCase() === 'AS' && reservedDataTypes.indexOf(token.value.toUpperCase()) === -1) {
+        qAs = token.value.substr(0, 1) !== '"' ? '"' : '';
+        token.value = token.value.toLowerCase();
+      }
       // In select first n statements, want the first field to be on a new line, not next to first n
       if (this.tokenLookBehind(3) && this.tokenLookBehind(3).value.toUpperCase() === 'SELECT' && this.tokenLookBehind(2).value.toUpperCase() === 'FIRST') query = this.addNewline(query);
       return query + qAs + this.show(token) + qAs + ' ';

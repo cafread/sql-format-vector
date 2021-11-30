@@ -1,3 +1,0 @@
-// When aliasing, the alias name should be lower case & quoted, take care not to catch CAST('1' AS INT) or numpas INT
-   lowercase in the above
-   check for functions not being done as well

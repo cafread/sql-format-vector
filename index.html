@@ -57,7 +57,7 @@
     </main>
     <script>
       window.input = CodeMirror.fromTextArea(document.getElementById('input'), {
-        mode: 'text/x-pgsql',
+        mode: 'text/x-vector',
         indentWithTabs: false,
         smartIndent: false,
         lineNumbers: true,
@@ -66,7 +66,7 @@
         tabSize: 2
       });
       window.output = CodeMirror.fromTextArea(document.getElementById('output'), {
-        mode: 'text/x-pgsql',
+        mode: 'text/x-vector',
         indentWithTabs: false,
         smartIndent: false,
         lineNumbers: true,
@@ -88,10 +88,12 @@
         gcCache(queries)
       }
       function gcCache (active=[]) {
+        let liveKeys = Object.keys(queryCache);
+        if ((liveKeys.length - active.length) < 200) return; // Don't bother running GC process if cache is small
         // So that editing continuously doesn't use all the memory on the system run garbage collection
         let keepKeys = (['', ';', '\n']).concat(active); // Keys in the cache we want to preserve
         // If there was a lot of concern about repeated queries, this could be a Set rather than an Array
-        for (let key of Object.keys(queryCache)) if (!keepKeys.includes(key)) delete queryCache[key];
+        for (let key of liveKeys.filter(k => keepKeys[k] === undefined)) delete queryCache[key];
       }
       // Avoid excessive calls while typing by debouncing input change
       function debounce (callback, time = 200) {

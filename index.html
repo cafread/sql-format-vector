@@ -2,7 +2,6 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono" rel="stylesheet" />
     <style>
       html,
       body {
@@ -10,7 +9,6 @@
         margin: 0;
         padding: 0;
         overflow: hidden;
-        font-family: 'Roboto Mono', monospace;
       }
       main {
         overflow: hidden;
@@ -18,7 +16,7 @@
         flex-direction: row;
         -webkit-align-items: stretch;
         align-items: stretch;
-        height: calc(100% - 120px);
+        height: calc(100% - 2px);
       }
       .input,
       .output {
@@ -36,39 +34,77 @@
         padding: 20px;
         border: 0;
         box-sizing: border-box;
-        font-size: 1.3em;
         resize: none;
         outline: none;
-        line-height: 1.3;
-        font-family: 'Roboto Mono', monospace;
       }
     </style>
+    <link rel="stylesheet" href="lib/codemirror.css">
+    <link rel="shortcut icon" href="favicon.ico"/>
+    <script src="lib/codemirror.js"></script>
+    <script src="lib/codemirror-sql.js"></script>
+    <script type="text/javascript" src="constants.js"></script>
+    <script type="text/javascript" src="sqlFormatter.js"></script>
+    <script type="text/javascript" src="unitTests.js"></script>
   </head>
   <body>
     <main>
       <section class="input">
-        <textarea id="input" autofocus="true" wrap="off">select * from table_name;</textarea
-        >
+        <textarea id="input" autofocus="true" wrap="off">/*Paste your code here, or just start writing!*/</textarea>
       </section>
       <section class="output">
-        <textarea id="output" readonly="true" wrap="off"></textarea>
+        <textarea id="output" readonly="true" wrap="off">/*Formatted output will appear here*/</textarea>
       </section>
     </main>
-    <script type="text/javascript" src="constants.js"></script>
-    <script type="text/javascript" src="sqlFormatter.js"></script>
     <script>
-      document.addEventListener('DOMContentLoaded', function () {
-        let input = document.getElementById('input');
-        let output = document.getElementById('output');
-        function format() {
-          output.value = sqlFormatter.format(input.value, {
-            language: 'sql',
-            uppercase: true,
-          });
-        }
-        input.addEventListener('input', format);
-        format();
+      window.input = CodeMirror.fromTextArea(document.getElementById('input'), {
+        mode: 'text/x-vector',
+        indentWithTabs: false,
+        smartIndent: false,
+        lineNumbers: true,
+        matchBrackets : true,
+        autofocus: false,
+        tabSize: 2
       });
+      window.output = CodeMirror.fromTextArea(document.getElementById('output'), {
+        mode: 'text/x-vector',
+        indentWithTabs: false,
+        smartIndent: false,
+        lineNumbers: true,
+        matchBrackets : true,
+        autofocus: false,
+        tabSize: 2
+      });
+      function format() {
+        let inp = input.doc.getValue();
+        let endsWithSc = inp.replace(/\s/gm, '').slice(-1) === ';';
+        // To improve performance when dealing with many queries at once and making edits, split into individual queries and cache results
+        // Find all non-commented ; and split into individual queries
+        // To avoid a super complex regex, replacing commented ';' with 'ỿ' temporarily
+        let queries = input.doc.getValue().replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\-\-.*$ /gm, v => v.replaceAll(';', 'ỿ')).split(';').map(v => v.replaceAll('ỿ', ';'));
+        for (let q of queries.filter(v => !queryCache.hasOwnProperty(v))) queryCache[q] = sqlFormatter.format(q + ';', {language: 'sql', uppercase: true});
+        let out = queries.map(q => queryCache[q]).join('\n');
+        out =  endsWithSc ? out : out.slice(0, out.length - 1);
+        output.doc.setValue(out);
+        gcCache(queries)
+      }
+      function gcCache (active=[]) {
+        let liveKeys = Object.keys(queryCache);
+        if ((liveKeys.length - active.length) < 200) return; // Don't bother running GC process if cache is small
+        // So that editing continuously doesn't use all the memory on the system run garbage collection
+        let keepKeys = (['', ';', '\n']).concat(active); // Keys in the cache we want to preserve
+        // If there was a lot of concern about repeated queries, this could be a Set rather than an Array
+        for (let key of liveKeys.filter(k => keepKeys[k] === undefined)) delete queryCache[key];
+      }
+      // Avoid excessive calls while typing by debouncing input change
+      function debounce (callback, time = 200) {
+        let interval;
+        return (...args) => {
+          clearTimeout(interval);
+          interval = setTimeout(() => {interval = null; callback(...args);}, time);
+        };
+      }
+      var dbf = debounce(format, 40);
+      CodeMirror.on(input, 'change', dbf);
     </script>
   </body>
 </html>

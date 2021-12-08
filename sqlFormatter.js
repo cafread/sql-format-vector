@@ -2,11 +2,11 @@
 // Adapted for Vector & PX Standards by https://github.com/cafread
 
 (function webpackUniversalModuleDefinition(root, factory) {
-	if(typeof exports === 'object' && typeof module === 'object')
+	if (typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
-	else if(typeof define === 'function' && define.amd)
+	else if (typeof define === 'function' && define.amd)
 		define([], factory);
-	else if(typeof exports === 'object')
+	else if (typeof exports === 'object')
 		exports["sqlFormatter"] = factory();
 	else
 		root["sqlFormatter"] = factory();
@@ -17,7 +17,7 @@ return  (function(modules) { // webpackBootstrap
  	// The require function
  	function _wprq_(moduleId) {
  		// Check if module is in cache
- 		if(installedModules[moduleId]) {
+ 		if (installedModules[moduleId]) {
  			return installedModules[moduleId].exports;
  		}
  		// Create a new module (and put it into the cache)
@@ -39,13 +39,13 @@ return  (function(modules) { // webpackBootstrap
  	_wprq_.c = installedModules;
  	// define getter function for harmony exports
  	_wprq_.d = function(exports, name, getter) {
- 		if(!_wprq_.o(exports, name)) {
+ 		if (!_wprq_.o(exports, name)) {
  			Object.defineProperty(exports, name, { enumerable: true, get: getter });
  		}
  	};
  	// define __esModule on exports
  	_wprq_.r = function(exports) {
- 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+ 		if (typeof Symbol !== 'undefined' && Symbol.toStringTag) {
  			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
  		}
  		Object.defineProperty(exports, '__esModule', { value: true });
@@ -56,13 +56,13 @@ return  (function(modules) { // webpackBootstrap
  	// mode & 4: return value when already ns object
  	// mode & 8|1: behave like require
  	_wprq_.t = function(value, mode) {
- 		if(mode & 1) value = _wprq_(value);
- 		if(mode & 8) return value;
- 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
+ 		if (mode & 1) value = _wprq_(value);
+ 		if (mode & 8) return value;
+ 		if ((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
  		var ns = Object.create(null);
  		_wprq_.r(ns);
  		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
- 		if(mode & 2 && typeof value != 'string') for(var key in value) _wprq_.d(ns, key, function(key) { return value[key]; }.bind(null, key));
+ 		if (mode & 2 && typeof value != 'string') for(var key in value) _wprq_.d(ns, key, function(key) { return value[key]; }.bind(null, key));
  		return ns;
  	};
  	// getDefaultExport function for compatibility with non-harmony modules
@@ -156,9 +156,22 @@ var Formatter = function () {
     value: function getFormattedQueryFromTokens() {
       var _this = this;
       var formattedQuery = '';
+      let inCreate = 0;
       this.tokens.forEach(function (token, index) {
         _this.index = index;
         token = _this.tokenOverride(token);
+        if (token.value.toUpperCase() === 'CREATE') {
+          inCreate = 1;
+        } else if (inCreate === 1 && token.value === '(') { // && Not CTAS
+          // if we can find 'SELECT' between the last 'CREATE' and the end of formattedQuery
+          // need regex so we don't end up matching something in an alias / table name of best_selections etc.
+          let splitByCreate = formattedQuery.split(/\bCREATE\b/gi)
+          let afterCreate = splitByCreate[splitByCreate.length - 1];
+          let isCTAS = afterCreate.match(/\bSELECT\b/gi) !== null;
+          inCreate = isCTAS ? 0 : 2;
+        } else if (inCreate === 2 && token.value === ';') {
+          inCreate = 0;
+        }
         if (token.type === _tokenTypes_WIM0__["default"].LINE_COMMENT) {
           formattedQuery = _this.formatLineComment(token, formattedQuery);
         } else if (token.type === _tokenTypes_WIM0__["default"].BLOCK_COMMENT) {
@@ -173,7 +186,21 @@ var Formatter = function () {
           formattedQuery = _this.formatNewlineReservedWord(token, formattedQuery);
           _this.previousReservedToken = token;
         } else if (token.type === _tokenTypes_WIM0__["default"].RESERVED) {
-          formattedQuery = _this.formatWithSpaces(token, formattedQuery);
+          // Want SELECT FIRST 10 on a single line
+          if (token.value.toUpperCase() === 'FIRST' && formattedQuery.substr(-9).toUpperCase() === 'SELECT\n  ') {
+            formattedQuery = formattedQuery.substr(0, formattedQuery.length - 3) + ' ';
+          }
+          if (inCreate === 2 && reservedDataTypes.indexOf(token.value.toUpperCase()) > -1) {
+            // Try to align data type in table create statement
+            token.value = (' ').repeat(Math.max(0, dataTypeChPos - (formattedQuery.length - formattedQuery.lastIndexOf('\n')))) + token.value;
+            formattedQuery = _this.formatWithSpaces(token, formattedQuery);
+          } else if (inCreate === 2 && reservedConstraints.indexOf(token.value.toUpperCase()) > -1) {
+            // Align PRIMARY KEY, NULL, NOT NULL a bit further along
+            token.value = (' ').repeat(Math.max(0, constraintChPos - (formattedQuery.length - formattedQuery.lastIndexOf('\n')))) + token.value;
+            formattedQuery = _this.formatWithSpaces(token, formattedQuery);
+          } else {
+            formattedQuery = _this.formatWithSpaces(token, formattedQuery);
+          }
           _this.previousReservedToken = token;
         } else if (token.type === _tokenTypes_WIM0__["default"].OPEN_PAREN) {
           formattedQuery = _this.formatOpeningParentheses(token, formattedQuery);
@@ -190,6 +217,12 @@ var Formatter = function () {
         } else if (token.value === ';') {
           formattedQuery = _this.formatQuerySeparator(token, formattedQuery);
         } else {
+          // In create statements, wrap field names with quotes, if they aren't already.  Don't wrap default values / data types!
+          if (inCreate === 2 && isNaN(parseInt(token.value)) && (["'", '"']).indexOf(token.value.substr(0, 1)) === -1) {
+            token.value = '"' + token.value.toLowerCase() + '"';
+          } else if (inCreate === 2 && isNaN(parseInt(token.value)) && (["'"]).indexOf(token.value.substr(0, 1)) === -1) {
+            token.value = token.value.toLowerCase();
+          }
           formattedQuery = _this.formatWithSpaces(token, formattedQuery);
         }
       });
@@ -198,6 +231,7 @@ var Formatter = function () {
   }, {
     key: "formatLineComment",
     value: function formatLineComment(token, query) {
+      token.value = token.value.replace(/--\S/gmi, v => '-- ' + v.substr(2));
       return this.addNewline(query + this.show(token));
     }
   }, {
@@ -224,7 +258,7 @@ var Formatter = function () {
       query = this.addNewline(query);
       this.indentation.increaseTopLevel();
       query += this.equalizeWhitespace(this.show(token));
-      if ( (['FROM', 'JOIN', 'WHERE', 'INSERT INTO', 'GROUP BY', 'ORDER BY', 'HAVING']).includes(token.value.toUpperCase()) ){
+      if (reservedTopLevelWordsNoLineAfter.includes(token.value.toUpperCase()) ) {
         return query + ' ';
       } else {
         return this.addNewline(query);
@@ -252,6 +286,14 @@ var Formatter = function () {
       var preserveWhitespaceFor = (_preserveWhitespaceFo = {}, _defineProperty(_preserveWhitespaceFo, _tokenTypes_WIM0__["default"].OPEN_PAREN, true), _defineProperty(_preserveWhitespaceFo, _tokenTypes_WIM0__["default"].LINE_COMMENT, true), _defineProperty(_preserveWhitespaceFo, _tokenTypes_WIM0__["default"].OPERATOR, true), _preserveWhitespaceFo);
       if (token.whitespaceBefore.length === 0 && !preserveWhitespaceFor[(_this$tokenLookBehind = this.tokenLookBehind()) === null || _this$tokenLookBehind === void 0 ? void 0 : _this$tokenLookBehind.type]) {
         query = Object(_utils_WIM4__["trimSpacesEnd"])(query);
+      }
+      // if the previous token was CHAR, VARCHAR, DECIMAL etc. don't include a space before the open bracket
+      if (this.tokenLookBehind() && reservedDataTypes.indexOf(this.tokenLookBehind().value.toUpperCase()) > -1 && query.substr(-1) === ' ') {
+        query = query.trimEnd();
+      }
+      // if the previous token was a function that takes arguments don't include a space before the open bracket
+      if (this.tokenLookBehind() && reservedFuncTypes.indexOf(this.tokenLookBehind().value.toUpperCase()) > -1 && query.substr(-1) === ' ') {
+        query = query.trimEnd();
       }
       query += this.show(token);
       this.inlineBlock.beginIfPossible(this.tokens, this.index);
@@ -281,7 +323,6 @@ var Formatter = function () {
     key: "formatComma",
     value: function formatComma(token, query) {
       query = Object(_utils_WIM4__["trimSpacesEnd"])(query) + this.show(token) + ' ';
-
       if (this.inlineBlock.isActive()) {
         return query;
       } else if (Object(_token_WIM5__["isLimit"])(this.previousReservedToken)) {
@@ -303,9 +344,23 @@ var Formatter = function () {
   }, {
     key: "formatWithSpaces",
     value: function formatWithSpaces(token, query) {
-      // When aliasing, the alias name should be quoted
-      let plsQuote = query.substr(-4).toUpperCase() === ' AS ' && token.value.substr(0, 1) !== '"' ? '"' : '';
-      return query + plsQuote + this.show(token) + plsQuote + ' ';
+      // Don't split up valid combos ||, !=
+      let validCombos = ['||', '!='];
+      if (validCombos.filter(v => v[0] === token.value).length > -1 && this.tokenLookAhead()) {
+        let nextToken = this.tokenLookAhead().value;
+        for (let vc of validCombos.filter(v => v[0] === token.value)){
+          if (nextToken === vc[1]) return query + this.show(token);
+        }
+      }
+      // When aliasing, the alias name should be lower case & quoted, take care not to catch CAST('1' AS INT) or numpas INT
+      let qAs = '';
+      if (this.tokenLookBehind() && this.tokenLookBehind().value.toUpperCase() === 'AS' && reservedDataTypes.indexOf(token.value.toUpperCase()) === -1) {
+        qAs = token.value.substr(0, 1) !== '"' ? '"' : '';
+        token.value = token.value.toLowerCase();
+      }
+      // In select first n statements, want the first field to be on a new line, not next to first n
+      if (this.tokenLookBehind(3) && this.tokenLookBehind(3).value.toUpperCase() === 'SELECT' && this.tokenLookBehind(2).value.toUpperCase() === 'FIRST') query = this.addNewline(query);
+      return query + qAs + this.show(token) + qAs + ' ';
     }
   }, {
     key: "formatQuerySeparator",
@@ -313,8 +368,8 @@ var Formatter = function () {
       this.indentation.resetIndentation();
       let prefixWithNewLine = '\n';
       // Prefix with a newline only when it's at least 2 lines to the previous query separator
-      if (query.substr(query.lastIndexOf(';') + 1).length - query.substr(query.lastIndexOf(';') + 1).replaceAll('\n', '').length < 2){
-        prefixWithNewLine = '';
+      if (query.substr(query.lastIndexOf(';') + 1).length - query.substr(query.lastIndexOf(';') + 1).replaceAll('\n', '').length < 2) {
+        prefixWithNewLine = query.substr(query.lastIndexOf(';') + 1).length < INLINE_MAX_LENGTH ? '' : '\n';
       } else if (query.substr(-3) === '\n) ') { // Want '\n)' to not have a new line either
         prefixWithNewLine = '';
       } else { // For short statements, remove all newlines
@@ -323,7 +378,7 @@ var Formatter = function () {
           if (query.includes(qs)) {
             let qsPos = query.toUpperCase().lastIndexOf(qs);
             let thisQ = query.substr(qsPos);
-            if (thisQ.length < 60) {
+            if (thisQ.length < INLINE_MAX_LENGTH) {
               let prevQ = query.substr(0, query.length - thisQ.length);
               thisQ = thisQ.replaceAll('\n', ' ').replace(/\s{2,}/g, ' ');
               query = prevQ + thisQ;
@@ -436,7 +491,6 @@ var Indentation = function () {
     value: function decreaseBlockLevel() {
       while (this.indentTypes.length > 0) {
         var type = this.indentTypes.pop();
-
         if (type !== INDENT_TYPE_TOP_LEVEL) {
           break;
         }
@@ -461,8 +515,6 @@ var Indentation = function () {
   function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
   function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
   function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-  var INLINE_MAX_LENGTH = 80;
   /**
    * Bookkeeper for inline blocks.
    *
@@ -520,7 +572,7 @@ var Indentation = function () {
         for (var i = index; i < tokens.length; i++) {
           var token = tokens[i];
           length += token.value.length; // Overran max length
-          if (length > INLINE_MAX_LENGTH) {
+          if (length > (INLINE_MAX_LENGTH - 30)) {
             return false;
           }
           if (token.type === _tokenTypes_WIM0__["default"].OPEN_PAREN) {

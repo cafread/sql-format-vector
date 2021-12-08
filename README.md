@@ -10,3 +10,5 @@ Ideally future versions will quote fields in table generation and align field na
 Run this on a server, paste the raw query on the left, copy the result on the right.
 No options, as it's meant to return style guide compliant code.
 Aligning some of the result to maximise human readability is still advised.
+
+Demo: https://cafread.github.io/sql-format-vector/

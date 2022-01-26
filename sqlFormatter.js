@@ -231,7 +231,8 @@ var Formatter = function () {
   }, {
     key: "formatLineComment",
     value: function formatLineComment(token, query) {
-      token.value = token.value.replace(/--\S/gmi, v => '-- ' + v.substr(2));
+      // Space after comment start, except special case for PX
+      if (token.value !== '--custom fields to be added here') token.value = token.value.replace(/--\S/gmi, v => '-- ' + v.substr(2));
       return this.addNewline(query + this.show(token));
     }
   }, {

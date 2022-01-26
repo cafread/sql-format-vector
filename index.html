@@ -80,7 +80,11 @@
         // To improve performance when dealing with many queries at once and making edits, split into individual queries and cache results
         // Find all non-commented ; and split into individual queries
         // To avoid a super complex regex, replacing commented ';' with 'ỿ' temporarily
-        let queries = input.doc.getValue().replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\-\-.*$ /gm, v => v.replaceAll(';', 'ỿ')).split(';').map(v => v.replaceAll('ỿ', ';'));
+        let queries = input.doc.getValue()
+                               .replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\-\-.*$ /gm, v => v.replaceAll(';', 'ỿ'))
+                               .split(';')
+                               .filter(v => v.replaceAll(/\s/g, '').length > 1) // Exclude non-statements such as whitespace at the end
+                               .map(v => v.replaceAll('ỿ', ';'));
         for (let q of queries.filter(v => !queryCache.hasOwnProperty(v))) queryCache[q] = sqlFormatter.format(q + ';', {language: 'sql', uppercase: true});
         let out = queries.map(q => queryCache[q]).join('\n');
         out =  endsWithSc ? out : out.slice(0, out.length - 1);

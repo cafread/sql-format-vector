@@ -346,7 +346,7 @@ var Formatter = function () {
     key: "formatWithSpaces",
     value: function formatWithSpaces(token, query) {
       // Don't split up valid combos ||, !=
-      let validCombos = ['||', '!='];
+      let validCombos = ['||', '!=', '<>', '>=', '<='];
       if (validCombos.filter(v => v[0] === token.value).length > -1 && this.tokenLookAhead()) {
         let nextToken = this.tokenLookAhead().value;
         for (let vc of validCombos.filter(v => v[0] === token.value)){
@@ -357,6 +357,9 @@ var Formatter = function () {
       let qAs = '';
       if (this.tokenLookBehind() && this.tokenLookBehind().value.toUpperCase() === 'AS' && reservedDataTypes.indexOf(token.value.toUpperCase()) === -1) {
         qAs = token.value.substr(0, 1) !== '"' ? '"' : '';
+        token.value = token.value.toLowerCase();
+      } else if (token.type === 'word') {
+        // PX lower case handling for Vector before case sensitive allowed - table and field names in lower case, but not strings!
         token.value = token.value.toLowerCase();
       }
       // In select first n statements, want the first field to be on a new line, not next to first n

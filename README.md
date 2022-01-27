@@ -16,3 +16,5 @@ Formats Actian Vector SQL nicely, based on the work here: https://github.com/zer
 Paste the raw query on the left, copy the result on the right.
 No options, as it's meant to return roughly style guide compliant code.
 Aligning some of the result to maximise human readability is still advised.
+
+With Vector moving to being case sensitive throughout, while currently storing everything as lower case, this prepares statements to avoid breaking when that change goes live

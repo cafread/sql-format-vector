@@ -345,14 +345,16 @@ var Formatter = function () {
   }, {
     key: "formatWithSpaces",
     value: function formatWithSpaces(token, query) {
-      // Don't split up valid combos ||, !=
-      let validCombos = ['||', '!=', '<>', '>=', '<='];
+      // If a token is |, if the next token is also |, we want to end with || as per input, not | | which is non-functional
+      let validCombos = ['||', '!='];
       if (validCombos.filter(v => v[0] === token.value).length > -1 && this.tokenLookAhead()) {
         let nextToken = this.tokenLookAhead().value;
         for (let vc of validCombos.filter(v => v[0] === token.value)){
           if (nextToken === vc[1]) return query + this.show(token);
         }
       }
+      // SQL standards dictate use of != rather than <> when it appears as an operator
+      if (token.value === '<>' && token.type === 'operator') token.value = '!=';
       // When aliasing, the alias name should be lower case & quoted, take care not to catch CAST('1' AS INT) or numpas INT
       let qAs = '';
       if (this.tokenLookBehind() && this.tokenLookBehind().value.toUpperCase() === 'AS' && reservedDataTypes.indexOf(token.value.toUpperCase()) === -1) {

@@ -37,6 +37,16 @@
         resize: none;
         outline: none;
       }
+      #testInfo {
+        margin: 0;
+        padding: 2px;
+        position: absolute;
+        left: 40px;
+        bottom: 10px;
+        border: 2px solid rgb(96, 90, 124);
+        background-color: azure;
+        overflow: hidden;
+      }
     </style>
     <link rel="stylesheet" href="lib/codemirror.css">
     <link rel="shortcut icon" href="favicon.ico"/>
@@ -55,6 +65,7 @@
         <textarea id="output" readonly="true" wrap="off">/*Formatted output will appear here*/</textarea>
       </section>
     </main>
+    <div id="testInfo">Run Tests</div>
     <script>
       window.input = CodeMirror.fromTextArea(document.getElementById('input'), {
         mode: 'text/x-vector',
@@ -78,13 +89,14 @@
         let inp = input.doc.getValue();
         let endsWithSc = inp.replace(/\s/gm, '').slice(-1) === ';';
         // To improve performance when dealing with many queries at once and making edits, split into individual queries and cache results
-        // Find all non-commented ; and split into individual queries
+        // Find all non-commented, non-quoted ; and split into individual queries
         // To avoid a super complex regex, replacing commented ';' with 'ỿ' temporarily
         let queries = input.doc.getValue()
-                               .replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\-\-.*$ /gm, v => v.replaceAll(';', 'ỿ'))
+                               .replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\-\-.*$ /gm, v => v.replaceAll(';', 'ỿ')) // Commented ; => ỿ
+                               .replace(/(?=["'])(?:"[^"\\]*(?:\\[\s\S][^"\\]*)*"|'[^'\\]*(?:\\[\s\S][^'\\]*)*')/g, v => v.replace(';', 'ỿ')) // Quoted ; => ỿ
                                .split(';')
                                .filter(v => v.replaceAll(/\s/g, '').length > 1) // Exclude non-statements such as whitespace at the end
-                               .map(v => v.replaceAll('ỿ', ';'));
+                               .map(v => v.replaceAll('ỿ', ';')); // Put back commented and quoted semicolons
         for (let q of queries.filter(v => !queryCache.hasOwnProperty(v))) queryCache[q] = sqlFormatter.format(q + ';', {language: 'sql', uppercase: true});
         let out = queries.map(q => queryCache[q]).join('\n');
         out =  endsWithSc ? out : out.slice(0, out.length - 1);
@@ -109,6 +121,9 @@
       }
       var dbf = debounce(format, 40);
       CodeMirror.on(input, 'change', dbf);
+      
+      const testInfo = document.getElementById("testInfo");
+      testInfo.addEventListener("click", unitTest);
     </script>
   </body>
 </html>

@@ -81,7 +81,6 @@ return  (function(modules) { // webpackBootstrap
  	return _wprq_(_wprq_.s = "./src/sqlFormatter.js");
  })
 ({
-
  "./src/core/Formatter.js":
 (function(module, _wpex_, _wprq_) {
 "use strict";
@@ -162,14 +161,14 @@ var Formatter = function () {
         token = _this.tokenOverride(token);
         if (token.value.toUpperCase() === 'CREATE') {
           inCreate = 1;
-        } else if (inCreate === 1 && token.value === '(') { // && Not CTAS
+        } else if (inCreate === 1 && token.value === '(' && token.type !== 'string') { // && Not CTAS
           // if we can find 'SELECT' between the last 'CREATE' and the end of formattedQuery
           // need regex so we don't end up matching something in an alias / table name of best_selections etc.
           let splitByCreate = formattedQuery.split(/\bCREATE\b/gi)
           let afterCreate = splitByCreate[splitByCreate.length - 1];
           let isCTAS = afterCreate.match(/\bSELECT\b/gi) !== null;
           inCreate = isCTAS ? 0 : 2;
-        } else if (inCreate === 2 && token.value === ';') {
+        } else if (inCreate === 2 && token.value === ';' && token.type !== 'string') {
           inCreate = 0;
         }
         if (token.type === _tokenTypes_WIM0__["default"].LINE_COMMENT) {
@@ -723,7 +722,7 @@ var Tokenizer = function () {
       var tokens = [];
       var token; // Keep processing the string until it is empty
       while (input.length) {
-        // grab any preceding whitespace
+        // Grab any preceding whitespace
         var whitespaceBefore = this.getWhitespace(input);
         input = input.substring(whitespaceBefore.length);
         if (input.length) {
@@ -818,7 +817,6 @@ var Tokenizer = function () {
     key: "getStringNamedPlaceholderToken",
     value: function getStringNamedPlaceholderToken(input) {
       var _this = this;
-
       return this.getPlaceholderTokenWithKey({
         input: input,
         regex: this.STRING_NAMED_PLACEHOLDER_REGEX,

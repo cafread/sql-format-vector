@@ -352,6 +352,12 @@ return  (function(modules) { // webpackBootstrap
               if (nextToken === vc[1]) return query + this.show(token);
             }
           }
+          // When fields / tables / aliases are mentioned, they can come through as strings '"aBc"'
+          // These should be set to lower case when the count of " is even and balanced at the ends
+          if (token.type === 'string' && token.value[0] === '"' && token.value[token.value.length-1] === '"') {
+            // if value has no internal " then set it to lower case
+            if (!token.value.substr(1,token.value.length-2).includes('"')) token.value = token.value.toLowerCase();
+          }
           // SQL standards dictate use of != rather than <> when it appears as an operator
           if (token.value === '<>' && token.type === 'operator') token.value = '!=';
           // When aliasing, the alias name should be lower case & quoted, take care not to catch CAST('1' AS INT) or numpas INT

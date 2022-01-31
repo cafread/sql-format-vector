@@ -15,6 +15,7 @@ const testInputs = [
   {"testFor": 'aliased semicolon', "inpStr": 'select 1 as "f;" from t', "expStr": `SELECT\n  1 AS "f;"\nFROM t`},
   {"testFor": 'complexity', "inpStr": `select '[{[");|_-+=' f from x`, "expStr": `SELECT\n  '[{[");|_-+=' f\nFROM x`},
   {"testFor": 'complexity 2', "inpStr": `SELECT ';' AS "a", 's' AS "s;" from x;`, "expStr": `SELECT\n  ';' AS "a",\n  's' AS "s;"\nFROM x;`},
+  {"testFor": 'table and field alias case', "inpStr": `SELECT\n	UPPER("FiElD") AS "x",\n	'OK' AS "Y",\n  CASE\n		WHEN UPPER(custom."Trip Purpose Description") IN (\n    		'REC', 'AbC', 'ASAA', 'ETER', 'ETEA', 'ZZZ'\n    	)\n      THEN 'Yes'\n    END AS s\nFROM SsSs\n;`, "expStr": `SELECT\n  UPPER("field") AS "x",\n  'OK' AS "y",\n  CASE\n    WHEN UPPER(custom."trip purpose description") IN ('REC', 'AbC', 'ASAA', 'ETER', 'ETEA', 'ZZZ') THEN 'Yes'\n  END AS "s"\nFROM ssss\n;`},
   {"testFor": 'message', "inpStr": 'tests complete', "expStr": 'tests complete'}
 ];
 async function unitTest() {

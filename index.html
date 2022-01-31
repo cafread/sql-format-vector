@@ -38,14 +38,20 @@
         outline: none;
       }
       #testInfo {
+        font-family: system-ui, sans-serif;
         margin: 0;
         padding: 2px;
         position: absolute;
         left: 40px;
-        bottom: 10px;
-        border: 2px solid rgb(96, 90, 124);
+        bottom: 20px;
+        border: 2px solid #99c;
         background-color: azure;
         overflow: hidden;
+        cursor: pointer;
+        -webkit-user-select: none;  
+           -moz-user-select: none;    
+            -ms-user-select: none;      
+                user-select: none;
       }
     </style>
     <link rel="stylesheet" href="lib/codemirror.css">
@@ -101,7 +107,7 @@
         let out = queries.map(q => queryCache[q]).join('\n');
         out =  endsWithSc ? out : out.slice(0, out.length - 1);
         output.doc.setValue(out);
-        gcCache(queries)
+        gcCache(queries);
       }
       function gcCache (active=[]) {
         let liveKeys = Object.keys(queryCache);

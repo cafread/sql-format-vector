@@ -1,6 +1,6 @@
 // These should probably be key : object pairs where the object has properties like name, isFunction, lineBefore, lineAfter, noIndent, isDataType
 // Unfortunately, that would require reworking a lot of the code base that this was built upon
-var reservedWords = [
+const reservedWords = [
   'ABS', 'ACOS', 'ADD_MONTHS', 'ALL', 'ALTER', 'AND', 'ANSIDATE', 'ANY', 'AS', 'ASCII', 'ASIN', 'AT', 'ATAN', 'ATAN2', 'AVG', 'BEGINNING', 'BETWEEN', 'BIGINT', 'BIT_AND', 'BIT_NOT', 'BIT_OR', 
   'BIT_XOR', 'BOOLEAN', 'BOTH', 'BY', 'CALL', 'CALLED', 'CARDINALITY', 'CASE', 'CAST', 'CEIL', 'CEILING', 'CHAR', 'CHARACTER', 'CHARACTER_LENGTH', 'CHAREXTRACT', 'CHAR_LENGTH', 'CHR', 'CLOSE', 
   'COALESCE', 'COLLATE', 'COLLECT', 'COLUMN', 'COMBINE', 'COMMIT', 'CONCAT', 'CONDITION', 'CONNECT', 'CONSTRAINT', 'CONTAINING', 'CONVERT', 'COPY', 'CORR', 'COS', 'COUNT', 'COVAR_POP', 'COVAR_SAMP', 
@@ -24,23 +24,23 @@ var reservedWords = [
   'OPTION', 'CURRENT', 'INSTALLATION', 'CASCADE', 'PRIVILEGES', 'ACCESS', 'COPY_INTO', 'COPY_FROM', 'EXCLUDING', 'EXECUTE', 'SEQUENCE', 'NEXT', 'NOCREATE_TABLE', 'DATABASE', 'IF', 'INTEGER1',
   'INTEGER2', 'INTEGER4', 'INTEGER8'
 ];
-var reservedTopLevelWords = [
+const reservedTopLevelWords = [
     'ADD', 'ALTER COLUMN', 'ALTER TABLE', 'CASE', 'DELETE FROM', 'END', 'GROUP BY', 'LEFT JOIN', 'JOIN', 'FROM', 'HAVING', 'INSERT INTO', 'ORDER BY', 'SELECT', 'SET', 'UPDATE', 'VALUES', 'WHERE',
     'INNER JOIN', 'LEFT OUTER JOIN', 'RIGHT JOIN', 'RIGHT OUTER JOIN', 'FULL JOIN', 'FULL OUTER JOIN', 'CROSS JOIN'
 ];
-var reservedTopLevelWordsNoLineAfter = [
+const reservedTopLevelWordsNoLineAfter = [
     'ADD', 'ALTER COLUMN', 'ALTER TABLE', 'CASE', 'DELETE FROM', 'END', 'GROUP BY', 'LEFT JOIN', 'JOIN', 'FROM', 'HAVING', 'INSERT INTO', 'ORDER BY', 'SET', 'UPDATE', 'WHERE',
     'INNER JOIN', 'LEFT OUTER JOIN', 'RIGHT JOIN', 'RIGHT OUTER JOIN', 'FULL JOIN', 'FULL OUTER JOIN', 'CROSS JOIN'
 ];
-var reservedTopLevelWordsNoIndent = ['INTERSECT', 'UNION', 'UNION ALL', 'UNION DISTINCT', 'EXCEPT'];
-var reservedNewlineWords = ['ON', 'AND', 'ELSE', 'OR', 'WHEN'];
-var reservedDataTypes = [
+const reservedTopLevelWordsNoIndent = ['INTERSECT', 'UNION', 'UNION ALL', 'UNION DISTINCT', 'EXCEPT'];
+const reservedNewlineWords = ['ON', 'AND', 'ELSE', 'OR', 'WHEN'];
+const reservedDataTypes = [
   'INT', 'INTEGER', 'INT1', 'INT2', 'INT4', 'INT8', 'TINYINT', 'SMALLINT', 'BIGINT', 'CHAR', 'NCHAR', 'VARCHAR', 'NVARCHAR', 'BOOLEAN', 'DEC', 'NUMERIC', 'MONEY', 'DECIMAL', 'TIME',
   'TIME WITH TIME ZONE', 'TIME WITHOUT TIME ZONE', 'DATE', 'ANSIDATE', 'TIMESTAMP', 'TIMESTAMP WITH TIME ZONE', 'TIMESTAMP WITHOUT TIME ZONE', 'FLOAT', 'FLOAT4', 'FLOAT8', 'IPV4', 'IPV6', 'UUID',
   'TIMESTAMP_WITH_TZ', 'TIMESTAMP_WO_TZ', 'TIME_WITH_TZ', 'TIME_WO_TZ', 'INTEGER1', 'INTEGER2', 'INTEGER4', 'INTEGER8'
 ];
 // Functions, if a bracket follows this, there should be no gap e.g. MAX(duration)
-var reservedFuncTypes = [
+const reservedFuncTypes = [
   'CAST', 'LEFT', 'RIGHT', 'UPPER', 'LOWER', 'IFNULL', 'NULLIF', 'COALESCE', 'NVL', 'NVL2', 'RANDOM', 'ACOS', 'ABS', 'ADD_MONTHS', 'ANSIDATE', 'ANY', 'ASCII', 'ASIN', 'ATAN', 'ATAN2', 'AVG',
   'BIGINT', 'BOOLEAN', 'CEIL', 'CEILING', 'CHAR', 'CHARACTER_LENGTH', 'CHAREXTRACT', 'CHAR_LENGTH', 'CHR', 'CONCAT', 'CORR', 'COS', 'COUNT', 'COVAR_POP', 'COVAR_SAMP', 'DATE', 'DATE_FORMAT',
   'DATE_PART', 'DATE_TRUNC', 'DAY', 'DAYOFMONTH', 'DAYOFWEEK', 'DAYOFYEAR', 'DBMSINFO', 'DENSE_RANK', 'DOW', 'DOY', 'ELSE', 'END', 'ENDING', 'EPOCH', 'ESCAPE', 'EVERY', 'EXP', 'EXTRACT',
@@ -54,10 +54,10 @@ var reservedFuncTypes = [
   'TO_CHAR', 'TO_DATE', 'TO_TIME', 'TO_TIMESTAMP', 'TO_TIMESTAMP_TZ', 'TRIM', 'TRUNC', 'UNIX_TIMESTAMP', 'UPPER', 'UPPERCASE', 'UUID_COMPARE', 'UUID_CREATE', 'UUID_FROM_CHAR', 'UUID_TO_CHAR',
   'VARCHAR', 'VAR_POP', 'VAR_SAMP', 'WEEK', 'WEEK_ISO', 'YEAR', 'YEARWEEK', 'IF'
 ];
-var reservedConstraints = [
+const reservedConstraints = [
   'NULL', 'NOT', 'PRIMARY', 'FOREIGN'
 ];
-var dataTypeChPos = 35;
-var constraintChPos = 63;
-var INLINE_MAX_LENGTH = 70;
+const dataTypeChPos = 35;
+const constraintChPos = 63;
+const INLINE_MAX_LENGTH = 70;
 let queryCache = {';': '', '\n': '', '': ''};

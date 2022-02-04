@@ -166,7 +166,7 @@ return  (function(modules) { // webpackBootstrap
               // need regex so we don't end up matching something in an alias / table name of best_selections etc.
               let splitByCreate = formattedQuery.split(/\bCREATE\b/gi);
               let afterCreate = splitByCreate[splitByCreate.length - 1];
-              let isCTAS = afterCreate.match(/\bSELECT\b/gi) !== null;
+              let isCTAS = afterCreate.match(/\bSELECT\b/gi) !== null || afterCreate.match(/\bWITH\b/gi) !== null;
               inCreate = isCTAS ? 0 : 2;
             } else if (inCreate === 2 && token.value === ';' && token.type !== 'string') {
               inCreate = 0;
@@ -391,17 +391,18 @@ return  (function(modules) { // webpackBootstrap
           }
           // SQL standards dictate use of != rather than <> when it appears as an operator
           if (token.value === '<>' && token.type === 'operator') token.value = '!=';
-          // When aliasing, the alias name should be lower case & quoted, take care not to catch CAST('1' AS INT) or numpas INT
+          // When aliasing, the alias name should be lower case & quoted, take care not to catch CAST('1' AS INT) or numpas INT, also beware CTE in CTAS
           let qAs = '';
-          if (this.tokenLookBehind() && this.tokenLookBehind().value.toUpperCase() === 'AS' && reservedDataTypes.indexOf(token.value.toUpperCase()) === -1) {
+          let testAs = this.tokenLookBehind() && this.tokenLookBehind().value.toUpperCase() === 'AS';
+          let tetNotDataType = reservedDataTypes.indexOf(token.value.toUpperCase()) === -1;
+          let testNotCtasCte = token.value.toUpperCase() !== 'WITH' && query.replace(/^CREATE TABLE .+ AS $/, '') !== '';
+          if (testAs && tetNotDataType && testNotCtasCte) {
             qAs = token.value.substring(0, 1) !== '"' ? '"' : '';
             token.value = token.value.toLowerCase();
           } else if (token.type === 'word') {
             // PX lower case handling for Vector before case sensitive allowed - table and field names in lower case, but not strings!
             token.value = token.value.toLowerCase();
           }
-          // In select first n statements, want the first field to be on a new line, not next to first n
-          //if (this.tokenLookBehind(3) && this.tokenLookBehind(3).value.toUpperCase() === 'SELECT' && this.tokenLookBehind(2).value.toUpperCase() === 'FIRST') query = this.addNewline(query);
           return query + qAs + this.show(token) + qAs + ' ';
         }
       }, {

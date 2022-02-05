@@ -1,4 +1,4 @@
-# ![icon](favicon-32x32.png) sql-format-vector
+# ![icon](res/favicon-32x32.png) sql-format-vector
 ## See it live: https://cafread.github.io/sql-format-vector/
 
 Existing SQL formatters don't deal with all Vector keywords, align things poorly, slow down with longer chains of queries and frequently output ugly code.  Vector is also moving from all lower case table & field names to allowing both, which risks breaking existing queries.

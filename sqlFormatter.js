@@ -399,6 +399,8 @@ return  (function(modules) { // webpackBootstrap
           if (testAs && tetNotDataType && testNotCtasCte) {
             qAs = token.value.substring(0, 1) !== '"' ? '"' : '';
             token.value = token.value.toLowerCase();
+          } else if (testAs && tetNotDataType && !testNotCtasCte) {
+            return query.trim() + '\nWITH ';
           } else if (token.type === 'word') {
             // PX lower case handling for Vector before case sensitive allowed - table and field names in lower case, but not strings!
             token.value = token.value.toLowerCase();

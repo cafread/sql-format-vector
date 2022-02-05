@@ -11,7 +11,7 @@ const testInputs = [
   {"testFor": 'limit line length', "inpStr": 'CREATE TABLE tbl (\n  "s"             CHAR(1)                     PRIMARY KEY,\n  "t"             INT                         NOT NULL,\n  "x"             INT                         NOT NULL\n);', "expStr": 'CREATE TABLE tbl (\n  "s"                             CHAR(1)                     PRIMARY KEY,\n  "t"                             INT                         NOT NULL,\n  "x"                             INT                         NOT NULL\n);'},
   {"testFor": 'quoted semicolon', "inpStr": "select ';' as f from t", "expStr": `SELECT ';' AS "f" FROM t`},
   {"testFor": 'quoted semicolon in CTAS', "inpStr": "create table xx as select ';' as f from t", "expStr": `CREATE TABLE xx AS SELECT ';' AS "f" FROM t`},
-  {"testFor": 'CTE in CTAS', "inpStr": `CREATE TABLE some_ctas AS WITH some_cte AS (\n  SELECT\n    id,\n    MAX(invoice_date) AS "li",\n    SUM(VALUE) AS "v"\n  FROM inv\n)\nSELECT\n  *\nFROM some_cte\nWHERE v > 100\n;`},
+  {"testFor": 'CTE in CTAS', "inpStr": `CREATE TABLE some_ctas AS\nWITH some_cte AS (\n  SELECT\n    id,\n    MAX(invoice_date) AS "li",\n    SUM(VALUE) AS "v"\n  FROM inv\n  GROUP BY id\n),\ncte_2 AS (\n  SELECT\n    MAX(invoice_date) AS "md"\n  FROM inv\n)\nSELECT\n  *\nFROM some_cte\nWHERE v > 100\n;`},
   {"testFor": 'quoted semicolon and comment', "inpStr": "create table xx as select ';--' as f from t", "expStr": `CREATE TABLE xx AS SELECT ';--' AS "f" FROM t`},
   {"testFor": 'aliased semicolon', "inpStr": 'select 1 as "f;" from t', "expStr": `SELECT 1 AS "f;" FROM t`},
   {"testFor": 'complexity', "inpStr": `select '[{[");|_-+=' f from x`, "expStr": `SELECT '[{[");|_-+=' f FROM x`},

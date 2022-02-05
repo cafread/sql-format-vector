@@ -44,7 +44,8 @@
         position: absolute;
         left: 40px;
         bottom: 20px;
-        border: 2px solid #99c;
+        border: 2px solid #c1c1ff;
+        border-radius: 6px;
         background-color: azure;
         overflow: hidden;
         cursor: pointer;
@@ -69,7 +70,7 @@
   <body>
     <main>
       <section class="input">
-        <textarea id="input" autofocus="true" wrap="off">/*Paste your code here, or just start writing!*/</textarea>
+        <textarea id="input" autofocus="true" wrap="off">/*Paste code here, start writing or run tests*/</textarea>
       </section>
       <section class="output">
         <textarea id="output" readonly="true" wrap="off">/*Formatted output will appear here*/</textarea>
@@ -124,8 +125,8 @@
       var dbf = debounce(format, 40);
       CodeMirror.on(input, 'change', dbf);
       
-      const testInfo = document.getElementById("testInfo");
-      testInfo.addEventListener("click", unitTest);
+      const testInfo = document.getElementById('testInfo');
+      testInfo.addEventListener('click', unitTest);
       
       // Split incoming SQL by ; where it is not commented, part of a regex or string literal
       // Replace block comments with line comments when neither part of a string "/' nor commented
@@ -180,7 +181,7 @@
                 i++; // End or new line
               };
               o.push('\n');
-            } else if (c[i] === '/' && c[i+1] === "*") { // Start comment
+            } else if (c[i] === '/' && c[i+1] === '*') { // Start comment
               isInComment = true;
               o.push('\n--');
               if (c[i+2] !== ' ' && c[i+2] !== '\n') o.push(' '); // Add a space per spec if it's missing
@@ -202,11 +203,11 @@
           }
         }
         o = o.join('')
-             .replace(/ +\n/g, '\n')
+             .replace(/ +\n/g, '\n')                          // No hanging spaces
              .replaceAll('-- custom fields to be added here', '--custom fields to be added here')
-             .split(querySepar) // Split into queries
+             .split(querySepar)                               // Split into queries
              .filter(v => v.replaceAll(/\s/g, '').length > 1) // Only real queries 
-             .map(q => q.replace(/;+$/, '')); // Trim any trailing ;
+             .map(q => q.replace(/;+$/, ''));                 // Trim any trailing ;
         return o;
       }
     </script>

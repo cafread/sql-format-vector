@@ -1,5 +1,5 @@
 /***
-As results being acceptable are subjective in cases like line length, use the browser console to display results for more complex tests
+As results being acceptable are subjective in cases like line length, use the browser display results as well as the red / green evaluation
 Single function tests can still use assert, but the purpose here is to test the adaptation for vector, not the base repository
 ***/
 const testInputs = [

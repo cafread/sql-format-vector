@@ -753,7 +753,15 @@ return  (function(modules) { // webpackBootstrap
       }, {
         key: "getNextToken",
         value: function getNextToken(input, previousToken) {
-          return this.getCommentToken(input) || this.getStringToken(input) || this.getOpenParenToken(input) || this.getCloseParenToken(input) || this.getPlaceholderToken(input) || this.getNumberToken(input) || this.getReservedWordToken(input, previousToken) || this.getWordToken(input) || this.getOperatorToken(input);
+          return this.getCommentToken(input) ||
+                 this.getStringToken(input) ||
+                 this.getOpenParenToken(input) ||
+                 this.getCloseParenToken(input) ||
+                 this.getPlaceholderToken(input) ||
+                 this.getNumberToken(input) ||
+                 this.getReservedWordToken(input, previousToken) ||
+                 this.getWordToken(input) ||
+                 this.getOperatorToken(input);
         }
       }, {
         key: "getCommentToken",
@@ -762,7 +770,7 @@ return  (function(modules) { // webpackBootstrap
         }
       }, {
         key: "getLineCommentToken",
-        value: function getLineCommentToken(input) {
+          value: function getLineCommentToken(input) {
           return this.getTokenOnFirstMatch({
             input: input,
             type: _tokenTypes_WIM0__.vector.LINE_COMMENT,
@@ -808,7 +816,11 @@ return  (function(modules) { // webpackBootstrap
       }, {
         key: "getPlaceholderToken",
         value: function getPlaceholderToken(input) {
-          return this.getIdentNamedPlaceholderToken(input) || this.getStringNamedPlaceholderToken(input) || this.getIndexedPlaceholderToken(input);
+          let a = this.IDENT_NAMED_PLACEHOLDER_REGEX  === false ? undefined : this.getIdentNamedPlaceholderToken(input);
+          let b = this.STRING_NAMED_PLACEHOLDER_REGEX === false ? undefined : this.getStringNamedPlaceholderToken(input);
+          let c = this.INDEXED_PLACEHOLDER_REGEX      === false ? undefined : this.getIndexedPlaceholderToken(input);
+          return a || b || c;
+          //return this.getIdentNamedPlaceholderToken(input) || this.getStringNamedPlaceholderToken(input) || this.getIndexedPlaceholderToken(input);
         }
       }, {
         key: "getIdentNamedPlaceholderToken",
@@ -951,21 +963,21 @@ return  (function(modules) { // webpackBootstrap
  (function(module, _wpex_, _wprq_) {
     "use strict";
     _wprq_.r(_wpex_);
-    _wprq_.d(_wpex_, "createOperatorRegex", function() { return createOperatorRegex; });
-    _wprq_.d(_wpex_, "createLineCommentRegex", function() { return createLineCommentRegex; });
-    _wprq_.d(_wpex_, "createReservedWordRegex", function() { return createReservedWordRegex; });
-    _wprq_.d(_wpex_, "createWordRegex", function() { return createWordRegex; });
-    _wprq_.d(_wpex_, "createStringRegex", function() { return createStringRegex; });
-    _wprq_.d(_wpex_, "createStringPattern", function() { return createStringPattern; });
-    _wprq_.d(_wpex_, "createParenRegex", function() { return createParenRegex; });
-    _wprq_.d(_wpex_, "createPlaceholderRegex", function() { return createPlaceholderRegex; });
+    _wprq_.d(_wpex_, "createOperatorRegex",     () => createOperatorRegex    );
+    _wprq_.d(_wpex_, "createLineCommentRegex",  () => createLineCommentRegex );
+    _wprq_.d(_wpex_, "createReservedWordRegex", () => createReservedWordRegex);
+    _wprq_.d(_wpex_, "createWordRegex",         () => createWordRegex        );
+    _wprq_.d(_wpex_, "createStringRegex",       () => createStringRegex      );
+    _wprq_.d(_wpex_, "createStringPattern",     () => createStringPattern    );
+    _wprq_.d(_wpex_, "createParenRegex",        () => createParenRegex       );
+    _wprq_.d(_wpex_, "createPlaceholderRegex",  () => createPlaceholderRegex );
     let _utils_WIM0__ = _wprq_("./src/utils.js");
     function createOperatorRegex(multiLetterOperators) {
-      return new RegExp("^(".concat(Object(_utils_WIM0__.sortByLengthDesc)(multiLetterOperators).map(_utils_WIM0__["escapeRegExp"]).join('|'), "|.)"), 'u');
+      return new RegExp("^(".concat(Object(_utils_WIM0__.sortByLengthDesc)(multiLetterOperators).map(_utils_WIM0__.escapeRegExp).join('|'), "|.)"), 'u');
     }
     function createLineCommentRegex(lineCommentTypes) {
       return new RegExp("^((?:".concat(lineCommentTypes.map(function (c) {
-        return Object(_utils_WIM0__["escapeRegExp"])(c);
+        return Object(_utils_WIM0__.escapeRegExp)(c);
       }).join('|'), ").*?)(?:\r\n|\r|\n|$)"), 'u');
     }
     function createReservedWordRegex(reservedWords) {
@@ -1012,7 +1024,7 @@ return  (function(modules) { // webpackBootstrap
     function escapeParen(paren) {
       if (paren.length === 1) {
         // A single punctuation character
-        return Object(_utils_WIM0__["escapeRegExp"])(paren);
+        return Object(_utils_WIM0__.escapeRegExp)(paren);
       } else {
         // longer word
         return '\\b' + paren + '\\b';

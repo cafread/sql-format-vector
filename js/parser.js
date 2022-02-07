@@ -17,6 +17,7 @@ function parseThenSplit (code) {
         o.push(c[i]);
       } else if (c[i] === '\\') { // Escape
         escape = true;
+        o.push(c[i]); 
       } else {
         escape = false;
         o.push(c[i]); 
@@ -89,7 +90,8 @@ function parseThenSplit (code) {
 }
 function blockIsOnOneLine (str) {
   // Given a string starting with a block comment start /*
-  // Return true or false - do we see the comment end before we see a new line?
+  // Return false if the block comment is not terminated
+  // Return distance to end of comment or false if the comment is truly multi line
   let charsToNewLine = str.indexOf('\n');
   let charsToCommEnd = str.indexOf('*/');
   if (charsToCommEnd === -1) return false;

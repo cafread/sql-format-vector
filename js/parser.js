@@ -34,10 +34,10 @@ function parseThenSplit (code) {
     } else if (isInComment) { // Comment case
       if (c[i] === '*' && c[i+1] === '/') {
         isInComment = false;
-        o.push('\n');
+        o.push('*/\n');
         i++;
       } else if (c[i] === '\n') {
-        o.push('\n-- ');
+        o.push('\n');
       } else {
         o.push(c[i]);
       }
@@ -52,10 +52,17 @@ function parseThenSplit (code) {
         };
         o.push('\n');
       } else if (c[i] === '/' && c[i+1] === '*') { // Start comment
-        isInComment = true;
-        o.push('\n--');
-        if (c[i+2] !== ' ' && c[i+2] !== '\n') o.push(' '); // Add a space per spec if it's missing
-        i++; // Skip past comment chars
+        let cToNL = blockIsOnOneLine(code.slice(i));
+        if (cToNL) {// Turn this into a single line comment if it is only one one line
+          let asLineComm = code.slice(i+2, i+cToNL).trim();
+          o.push('\n-- ' + asLineComm + '\n');
+          i += cToNL + 1; // Skip past comment chars
+        } else { // Else treat this as a proper multi-line comment
+          o.push('\n/*');
+          isInComment = true;
+          if (c[i+2] !== ' ' && c[i+2] !== '\n') o.push(' '); // Add a space per spec if it's missing
+          i++; // Skip past comment chars
+        }
       } else if (c[i] === '/') { // Start regexp literal
         isInRegExp = true;
         o.push(c[i]);
@@ -79,4 +86,12 @@ function parseThenSplit (code) {
         .filter(v => v.replaceAll(/\s/g, '').length > 1) // Only real queries 
         .map(q => q.replace(/;+$/, ''));                 // Trim any trailing ;
   return o;
+}
+function blockIsOnOneLine (str) {
+  // Given a string starting with a block comment start /*
+  // Return true or false - do we see the comment end before we see a new line?
+  let charsToNewLine = str.indexOf('\n');
+  let charsToCommEnd = str.indexOf('*/');
+  if (charsToCommEnd === -1) return false;
+  return charsToCommEnd < charsToNewLine ? charsToCommEnd : false;
 }

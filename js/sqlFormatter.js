@@ -381,14 +381,6 @@ return  (function(modules) { // webpackBootstrap
       }, {
         key: "formatWithSpaces",
         value: function formatWithSpaces(token, query) {
-          // If a token is |, if the next token is also |, we want to end with || as per input, not | | which is non-functional
-          let validCombos = ['||', '!='];
-          if (validCombos.filter(v => v[0] === token.value).length > -1 && this.tokenLookAhead()) {
-            let nextToken = this.tokenLookAhead().value;
-            for (let vc of validCombos.filter(v => v[0] === token.value)){
-              if (nextToken === vc[1]) return query + this.show(token);
-            }
-          }
           // When fields / tables / aliases are mentioned, they can come through as strings '"aBc"'
           // These should be set to lower case when the count of " is even and balanced at the ends
           if (token.type === 'string' && token.value[0] === '"' && token.value[token.value.length-1] === '"') {
@@ -1129,6 +1121,7 @@ return  (function(modules) { // webpackBootstrap
             closeParens: [')', 'END'],
             indexedPlaceholderTypes: ['?'],
             namedPlaceholderTypes: [],
+            operators: ['!=', '||'],
             lineCommentTypes: ['--']
           });
         }

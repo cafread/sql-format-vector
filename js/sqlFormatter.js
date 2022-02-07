@@ -156,13 +156,14 @@ return  (function(modules) { // webpackBootstrap
           let _this = this;
           let formattedQuery = '';
           let inCreate = 0;
+          let prevToken = undefined;
           this.tokens.forEach(function (token, index) {
             _this.index = index;
             token = _this.tokenOverride(token);
             if (token.value.toUpperCase() === 'CREATE' && token.type !== 'string') {
               inCreate = 1;
             } else if (inCreate === 1 && token.value === '(' && token.type !== 'string') { // && Not CTAS
-              // if we can find 'SELECT' between the last 'CREATE' and the end of formattedQuery
+              // If we can find 'SELECT' between the last 'CREATE' and the end of formattedQuery
               // need regex so we don't end up matching something in an alias / table name of best_selections etc.
               let splitByCreate = formattedQuery.split(/\bCREATE\b/gi);
               let afterCreate = splitByCreate[splitByCreate.length - 1];
@@ -170,6 +171,10 @@ return  (function(modules) { // webpackBootstrap
               inCreate = isCTAS ? 0 : 2;
             } else if (inCreate === 2 && token.value === ';' && token.type !== 'string') {
               inCreate = 0;
+              // If someone is daft enough to have fields that share names with reserved words and not quote them, fix that
+            } else if (inCreate === 2 && token.type === 'reserved' && [',', '('].indexOf(prevToken.value) !== -1) {
+              token.value = '"' + token.value.toLowerCase() + '"';
+              token.type = 'string';
             }
             if (token.type === _tokenTypes_WIM0__.vector.LINE_COMMENT) {
               formattedQuery = _this.formatLineComment(token, formattedQuery);
@@ -235,6 +240,7 @@ return  (function(modules) { // webpackBootstrap
                 formattedQuery = _this.formatWithSpaces(token, formattedQuery);
               }
             }
+            prevToken = token;
           });
           // Put it on a single line if sensible to do so and get rid of unquoted whitespace
           if (formattedQuery.length < INLINE_MAX_LENGTH) {

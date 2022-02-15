@@ -60,4 +60,3 @@ const reservedConstraints = [
 const dataTypeChPos = 35;
 const constraintChPos = 63;
 const INLINE_MAX_LENGTH = 70;
-let queryCache = {';': '', '\n': '', '': ''};

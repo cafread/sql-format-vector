@@ -63,12 +63,6 @@
     <link rel="icon" type="image/png" sizes="16x16" href="res/favicon-16x16.png">
     <link rel="manifest" href="res/site.webmanifest">
     <link rel="shortcut icon" href="res/favicon.ico"/>
-    <script src="lib/codemirror.js"></script>
-    <script src="lib/codemirror-sql.js"></script>
-    <script type="text/javascript" src="js/constants.js"></script>
-    <script type="text/javascript" src="js/sqlFormatter.js"></script>
-    <script type="text/javascript" src="js/unitTests.js"></script>
-    <script type="text/javascript" src="js/parser.js"></script>
   </head>
   <body>
     <main>
@@ -80,6 +74,12 @@
       </section>
     </main>
     <div id="testInfo">Run Tests</div>
+    <script src="lib/codemirror.js"></script>
+    <script src="lib/codemirror-sql.js"></script>
+    <script type="text/javascript" src="js/constants.js"></script>
+    <script type="text/javascript" src="js/sqlFormatter.js"></script>
+    <script type="text/javascript" src="js/unitTests.js"></script>
+    <script type="text/javascript" src="js/parser.js"></script>
     <script>
       window.input = CodeMirror.fromTextArea(document.getElementById('input'), {
         mode: 'text/x-vector',
@@ -99,6 +99,7 @@
         autofocus: false,
         tabSize: 2
       });
+      let queryCache = {';': '', '\n': '', '': ''};
       function format() {
         let inp = input.doc.getValue();
         let endsWithSc = inp.replace(/\s/gm, '').slice(-1) === ';';
@@ -125,9 +126,7 @@
           interval = setTimeout(() => {interval = null; callback(...args);}, time);
         };
       }
-      var dbf = debounce(format, 40);
-      CodeMirror.on(input, 'change', dbf);
-      
+      CodeMirror.on(input, 'change', debounce(format, 40));
       const testInfo = document.getElementById('testInfo');
       testInfo.addEventListener('click', unitTest);
     </script>

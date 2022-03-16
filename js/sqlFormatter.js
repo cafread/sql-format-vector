@@ -202,8 +202,11 @@ return  (function(modules) { // webpackBootstrap
                 // Try to align data type in table create statement
                 token.value = (' ').repeat(Math.max(0, dataTypeChPos - (formattedQuery.length - formattedQuery.lastIndexOf('\n')))) + token.value;
                 formattedQuery = _this.formatWithSpaces(token, formattedQuery);
+              } else if (inCreate === 2 && token.value.toUpperCase() === 'PRIMARY' && prevToken.value === ',') {
+                // Align PRIMARY KEY (field...) at the end as if it were another field
+                formattedQuery = _this.formatWithSpaces(token, formattedQuery);
               } else if (inCreate === 2 && reservedConstraints.indexOf(token.value.toUpperCase()) > -1) {
-                // Align PRIMARY KEY, NULL, NOT NULL a bit further along
+                // Align PRIMARY KEY (on one field), NULL, NOT NULL a bit further along
                 token.value = (' ').repeat(Math.max(0, constraintChPos - (formattedQuery.length - formattedQuery.lastIndexOf('\n')))) + token.value;
                 formattedQuery = _this.formatWithSpaces(token, formattedQuery);
               } else {

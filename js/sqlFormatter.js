@@ -172,7 +172,7 @@ return  (function(modules) { // webpackBootstrap
             } else if (inCreate === 2 && token.value === ';' && token.type !== 'string') {
               inCreate = 0;
               // If someone is daft enough to have fields that share names with reserved words and not quote them, fix that
-            } else if (inCreate === 2 && token.type === 'reserved' && [',', '('].indexOf(prevToken.value) !== -1) {
+            } else if (inCreate === 2 && token.type === 'reserved' && [',', '('].indexOf(prevToken.value) !== -1 && token.value.toUpperCase() !== 'PRIMARY') {
               token.value = '"' + token.value.toLowerCase() + '"';
               token.type = 'string';
             }
